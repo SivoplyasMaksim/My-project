@@ -9,35 +9,52 @@ public class Shooting : MonoBehaviour
     public bool canFire;
     private float timer;
     public float timeBetweenFiring;
+
     void Start()
     {
-        mainCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+        mainCam = Camera.main;
+        timer = 0f;
+        canFire = true;
     }
 
     void Update()
     {
-        mousePos = mainCam.ScreenToWorldPoint(Input.mousePosition);
+        // Получаем позицию мыши в мировых координатах
+        Vector3 mouseWorldPos = mainCam.ScreenToWorldPoint(Input.mousePosition);
 
-        Vector3 rotation = mousePos - transform.position;
+        // Вычисляем направление (игнорируем Z для 2D)
+        Vector2 direction = new Vector2(
+            mouseWorldPos.x - transform.position.x,
+            mouseWorldPos.y - transform.position.y
+        ).normalized;
 
-        float rotZ = Mathf.Atan2(rotation.y, rotation.x) * Mathf.Rad2Deg - 90f;
+        // Поворот
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+        transform.rotation = Quaternion.Euler(0, 0, angle);
 
-        transform.rotation = Quaternion.Euler(0, 0, rotZ);
-
-        if (!canFire) 
+        // Таймер стрельбы
+        if (!canFire)
         {
             timer += Time.deltaTime;
-            if (timer > timeBetweenFiring) 
+            if (timer > timeBetweenFiring)
             {
-                canFire= true;
+                canFire = true;
                 timer = 0;
             }
         }
 
-        if (Input.GetMouseButton(0) && canFire) 
+        // Стрельба
+        if (Input.GetMouseButton(0) && canFire)
         {
             canFire = false;
-            Instantiate(bullet, bulletTransform.position, Quaternion.identity);
+
+            GameObject bulletInstance = Instantiate(bullet, bulletTransform.position, Quaternion.identity);
+
+            PlayerBullet playerBullet = bulletInstance.GetComponent<PlayerBullet>();
+            if (playerBullet != null)
+            {
+                playerBullet.Initialize(direction);
+            }
         }
     }
 }
