@@ -3,18 +3,19 @@ using UnityEngine.Events;
 
 public class Health : MonoBehaviour
 {
-    [SerializeField] private int maxHealth = 100;
-    private int currentHealth;
+    [SerializeField] protected int maxHealth = 100;
+    [SerializeField] private int scoreValue = 100;
+    protected int currentHealth; // ✅ protected вместо private
 
     public UnityEvent OnDeath;
     public UnityEvent<int> OnDamageTaken;
 
-    private void Awake()
+    protected virtual void Awake() // ✅ protected virtual вместо private
     {
         currentHealth = maxHealth;
     }
 
-    public void TakeDamage(int damage)
+    public virtual void TakeDamage(int damage) // ✅ virtual
     {
         currentHealth -= damage;
         OnDamageTaken?.Invoke(damage);
@@ -25,9 +26,17 @@ public class Health : MonoBehaviour
         }
     }
 
-    private void Die()
+    protected virtual void Die() // ✅ protected virtual
     {
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.AddScore(scoreValue);
+        }
         OnDeath?.Invoke();
         Destroy(gameObject);
+    }
+    public void SetScoreValue(int value)
+    {
+        scoreValue = value;
     }
 }

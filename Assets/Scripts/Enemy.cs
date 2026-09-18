@@ -16,12 +16,12 @@ public abstract class Enemy : MonoBehaviour
         }
     }
 
+
     protected virtual void OnCollisionEnter2D(Collision2D collision)
     {
-        // Наносим урон игроку при столкновении
         if (collision.gameObject.CompareTag("Player"))
         {
-            Health playerHealth = collision.gameObject.GetComponent<Health>();
+            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {
                 playerHealth.TakeDamage(damageOnCollision);
